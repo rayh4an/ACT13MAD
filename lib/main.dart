@@ -14,13 +14,24 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Firebase Auth App',
-      theme: ThemeData(primarySwatch: Colors.blue),
+      theme: ThemeData(
+        primaryColor: Colors.lightBlue,
+        scaffoldBackgroundColor: Color(0xFFF5F5DC),
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.lightBlue,
+          foregroundColor: Colors.white,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.lightBlue,
+          ),
+        ),
+      ),
       home: AuthScreen(),
     );
   }
 }
 
-// ✅ Home/Login/Register Screen
 class AuthScreen extends StatefulWidget {
   @override
   State<AuthScreen> createState() => _AuthScreenState();
@@ -59,8 +70,7 @@ class _AuthScreenState extends State<AuthScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder:
-              (_) => ProfileScreen(user: FirebaseAuth.instance.currentUser!),
+          builder: (_) => ProfileScreen(user: FirebaseAuth.instance.currentUser!),
         ),
       );
     } on FirebaseAuthException catch (e) {
@@ -75,10 +85,28 @@ class _AuthScreenState extends State<AuthScreen> {
           _errorMessage = e.message ?? 'Authentication error';
         }
       });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Invalid Information Presented'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 2),
+        ),
+      );
     } catch (e) {
       setState(() {
         _errorMessage = 'Something went wrong. Please try again.';
       });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Invalid Information Presented'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 2),
+        ),
+      );
     } finally {
       setState(() => _isLoading = false);
     }
@@ -99,21 +127,15 @@ class _AuthScreenState extends State<AuthScreen> {
                   TextFormField(
                     controller: _emailController,
                     decoration: InputDecoration(labelText: 'Email'),
-                    validator:
-                        (value) =>
-                            value != null && value.contains('@')
-                                ? null
-                                : 'Enter a valid email',
+                    validator: (value) =>
+                        value != null && value.contains('@') ? null : 'Enter a valid email',
                   ),
                   TextFormField(
                     controller: _passwordController,
                     decoration: InputDecoration(labelText: 'Password'),
                     obscureText: true,
-                    validator:
-                        (value) =>
-                            value != null && value.length >= 6
-                                ? null
-                                : 'Min 6 characters',
+                    validator: (value) =>
+                        value != null && value.length >= 6 ? null : 'Min 6 characters',
                   ),
                   SizedBox(height: 16),
                   if (_errorMessage.isNotEmpty)
@@ -122,9 +144,9 @@ class _AuthScreenState extends State<AuthScreen> {
                   _isLoading
                       ? CircularProgressIndicator()
                       : ElevatedButton(
-                        onPressed: _submit,
-                        child: Text(_isLogin ? 'Login' : 'Register'),
-                      ),
+                          onPressed: _submit,
+                          child: Text(_isLogin ? 'Login' : 'Register'),
+                        ),
                   TextButton(
                     onPressed: () {
                       setState(() {
@@ -148,7 +170,6 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 }
 
-// ✅ Separate Profile Screen
 class ProfileScreen extends StatefulWidget {
   final User user;
 
@@ -175,13 +196,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       await widget.user.updateDisplayName(_nameController.text.trim());
       await widget.user.reload();
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Name updated!')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Name Successfully Changed'),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 2),
+        ),
+      );
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to update name')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update name')),
+      );
     } finally {
       setState(() => _isUpdating = false);
     }
@@ -192,13 +218,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await FirebaseAuth.instance.sendPasswordResetEmail(
         email: _resetEmailController.text.trim(),
       );
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Reset email sent')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Password Reset Email Sent'),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 2),
+        ),
+      );
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Reset failed')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Reset failed')),
+      );
     }
   }
 
